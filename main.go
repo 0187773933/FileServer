@@ -22,7 +22,7 @@ func SetupCloseHandler() {
 	go func() {
 		<-c
 		fmt.Println( "\r- Ctrl+C pressed in Terminal" )
-		fmt.Println( "Shutting Down Blogger Server" )
+		fmt.Println( "Shutting Down File Server" )
 		DB.Close()
 		s.FiberApp.Shutdown()
 		os.Exit( 0 )
@@ -43,8 +43,8 @@ func main() {
 
 	SetupCloseHandler()
 
-	utils.GenerateNewKeys()
-	// s = server.New( DB , config )
-	// s.Start()6
+	// utils.GenerateNewKeys()
+	s = server.New( DB , config )
+	s.Start()
 
 }

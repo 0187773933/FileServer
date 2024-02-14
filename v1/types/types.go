@@ -14,38 +14,7 @@ type ConfigFile struct {
 	TimeZone string `yaml:"time_zone"`
 	BoltDBPath string `yaml:"bolt_db_path"`
 	BoltDBEncryptionKey string `yaml:"bolt_db_encryption_key"`
-}
-
-// type PostTypes  struct {
-// 	Text string `yaml:"text"`
-// 	HTML string `yaml:"html"`
-// 	Bytes []byte `yaml:"bytes"`
-// }
-
-type Post struct {
-	UUID string `json:"uuid"`
-	ULID string `json:"ulid"`
-	// SeqID int `json:"seq_id"`
-	Date string `json:"date"`
-	Type string `json:"type"`
-	HTML string `json:"html"`
-	Text string `json:"text"`
-	MD []string `json:"mark_down"`
-}
-
-type FileData struct {
-	FileName string
-	Data []byte
-}
-
-type Page struct {
-	UUID string `json:"uuid"`
-	// ULID string `json:"ulid"`
-	// Date string `json:"date"`
-	// Type string `json:"type"`
-	// HTML string `json:"html"`
-	HTMLB64 string `json:"html_b64"`
-	URL string `json:"url"`
-	// Text string `json:"text"`
-	// MD []string `json:"mark_down"`
+	ServeDirectory string `yaml:"serve_directory"`
+	ServeBrowsable bool `yaml:"serve_browsable"`
+	ServeIndexFile string `yaml:"serve_index_file"`
 }

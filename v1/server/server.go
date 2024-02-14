@@ -3,10 +3,10 @@ package server
 import (
 	"fmt"
 	bolt "github.com/boltdb/bolt"
-	fiber "github.com/gofiber/fiber/v2"
-	fiber_cookie "github.com/gofiber/fiber/v2/middleware/encryptcookie"
-	fiber_cors "github.com/gofiber/fiber/v2/middleware/cors"
-	favicon "github.com/gofiber/fiber/v2/middleware/favicon"
+	fiber "github.com/gofiber/fiber/v3"
+	fiber_cookie "github.com/gofiber/fiber/v3/middleware/encryptcookie"
+	fiber_cors "github.com/gofiber/fiber/v3/middleware/cors"
+	favicon "github.com/gofiber/fiber/v3/middleware/favicon"
 	types "github.com/0187773933/FileServer/v1/types"
 	logger "github.com/0187773933/FileServer/v1/logger"
 )
@@ -20,7 +20,7 @@ type Server struct {
 	Config types.ConfigFile `yaml:"config"`
 }
 
-func request_logging_middleware( context *fiber.Ctx ) ( error ) {
+func request_logging_middleware( context fiber.Ctx ) ( error ) {
 	ip_address := context.Get( "x-forwarded-for" )
 	if ip_address == "" { ip_address = context.IP() }
 	log_message := fmt.Sprintf( "%s === %s === %s" , ip_address , context.Method() , context.Path() );
@@ -45,7 +45,7 @@ func New( db *bolt.DB , config types.ConfigFile ) ( server Server ) {
 		AllowCredentials: true ,
 	}))
 	server.SetupRoutes()
-	server.FiberApp.Get( "/*" , func( context *fiber.Ctx ) ( error ) { return context.Redirect( "/" ) } )
+	server.FiberApp.Get( "/*" , func( context fiber.Ctx ) ( error ) { return context.Redirect().To( "/" ) } )
 	return
 }
 

@@ -3,12 +3,12 @@ package server
 import (
 	"fmt"
 	"time"
-	fiber "github.com/gofiber/fiber/v2"
+	fiber "github.com/gofiber/fiber/v3"
 	bcrypt "golang.org/x/crypto/bcrypt"
 	encryption "github.com/0187773933/encryption/v1/encryption"
 )
 
-func validate_login_credentials( context *fiber.Ctx ) ( result bool ) {
+func validate_login_credentials( context fiber.Ctx ) ( result bool ) {
 	result = false
 	uploaded_username := context.FormValue( "username" )
 	if uploaded_username == "" { fmt.Println( "username empty" ); return }
@@ -21,13 +21,13 @@ func validate_login_credentials( context *fiber.Ctx ) ( result bool ) {
 	return
 }
 
-func serve_failed_attempt( context *fiber.Ctx ) ( error ) {
+func serve_failed_attempt( context fiber.Ctx ) ( error ) {
 	context.Set( "Content-Type" , "text/html" )
 	return context.SendString( "<h1>no</h1>" )
 	// return context.SendFile( "./v1/server/html/admin_login.html" )
 }
 
-func ( s *Server ) Logout( context *fiber.Ctx ) ( error ) {
+func ( s *Server ) Logout( context fiber.Ctx ) ( error ) {
 	context.Cookie( &fiber.Cookie{
 		Name: s.Config.ServerCookieName ,
 		Value: "" ,
@@ -40,7 +40,7 @@ func ( s *Server ) Logout( context *fiber.Ctx ) ( error ) {
 }
 
 // POST http://localhost:5950/admin/login
-func ( s *Server ) LoginPost( context *fiber.Ctx ) ( error ) {
+func ( s *Server ) LoginPost( context fiber.Ctx ) ( error ) {
 	valid_login := validate_login_credentials( context )
 	if valid_login == false { return serve_failed_attempt( context ) }
 	context.Cookie(
@@ -55,14 +55,14 @@ func ( s *Server ) LoginPost( context *fiber.Ctx ) ( error ) {
 			Expires: time.Now().AddDate( 10 , 0 , 0 ) , // aka 10 years from now
 		} ,
 	)
-	return context.Redirect( "/" )
+	return context.Redirect().To( "/" )
 }
 
-func ( s *Server ) LoginGet( context *fiber.Ctx ) ( error ) {
+func ( s *Server ) LoginGet( context fiber.Ctx ) ( error ) {
 	return context.SendFile( "./v1/server/html/login.html" )
 }
 
-func validate_admin_cookie( context *fiber.Ctx ) ( result bool ) {
+func validate_admin_cookie( context fiber.Ctx ) ( result bool ) {
 	result = false
 	admin_cookie := context.Cookies( GlobalConfig.ServerCookieName )
 	if admin_cookie == "" { fmt.Println( "admin cookie was blank" ); return }
@@ -72,7 +72,7 @@ func validate_admin_cookie( context *fiber.Ctx ) ( result bool ) {
 	return
 }
 
-func validate_session( context *fiber.Ctx ) ( result bool ) {
+func validate_session( context fiber.Ctx ) ( result bool ) {
 	result = false
 	admin_cookie := context.Cookies( GlobalConfig.ServerCookieName )
 	if admin_cookie != "" {
@@ -99,7 +99,7 @@ func validate_session( context *fiber.Ctx ) ( result bool ) {
 	return
 }
 
-func validate_session_mw( context *fiber.Ctx ) ( error ) {
+func validate_session_mw( context fiber.Ctx ) ( error ) {
 	admin_cookie := context.Cookies( GlobalConfig.ServerCookieName )
 	if admin_cookie != "" {
 		admin_cookie_value := encryption.SecretBoxDecrypt( GlobalConfig.BoltDBEncryptionKey , admin_cookie )

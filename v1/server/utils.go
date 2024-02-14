@@ -3,33 +3,11 @@ package server
 import (
 	"fmt"
 	"time"
-	"bytes"
-	// "strings"
-	// ical "github.com/arran4/golang-ical"
 	bolt "github.com/boltdb/bolt"
-	ical "github.com/emersion/go-ical"
-	fiber "github.com/gofiber/fiber/v2"
-	rate_limiter "github.com/gofiber/fiber/v2/middleware/limiter"
+	fiber "github.com/gofiber/fiber/v3"
+	rate_limiter "github.com/gofiber/fiber/v3/middleware/limiter"
 	utils "github.com/0187773933/FileServer/v1/utils"
 )
-
-func ICalGetTest() ( result string ) {
-	event := ical.NewEvent()
-	event.Props.SetText( ical.PropUID , "uid@example.org" )
-	event.Props.SetDateTime( ical.PropDateTimeStamp , time.Now() )
-	event.Props.SetText( ical.PropSummary , "My awesome event" )
-	event.Props.SetDateTime( ical.PropDateTimeStart , time.Now().Add( 24 * time.Hour ) )
-
-	cal := ical.NewCalendar()
-	cal.Props.SetText( ical.PropVersion , "2.0" )
-	cal.Props.SetText( ical.PropProductID , "-//xyz Corp//NONSGML PDA Calendar Version 1.0//EN" )
-	cal.Children = append( cal.Children , event.Component )
-
-	var buf bytes.Buffer
-	ical.NewEncoder( &buf ).Encode( cal )
-	result = buf.String()
-	return
-}
 
 // weak attempt at sanitizing form input to build a "username"
 func SanitizeUsername( first_name string , last_name string ) ( username string ) {
@@ -41,11 +19,11 @@ func SanitizeUsername( first_name string , last_name string ) ( username string 
 	return
 }
 
-func ServeLoginPage( context *fiber.Ctx ) ( error ) {
+func ServeLoginPage( context fiber.Ctx ) ( error ) {
 	return context.SendFile( "./v1/server/html/login.html" )
 }
 
-// func ServeAuthenticatedPage( context *fiber.Ctx ) ( error ) {
+// func ServeAuthenticatedPage( context fiber.Ctx ) ( error ) {
 // 	if validate_admin_cookie( context ) == false { return serve_failed_attempt( context ) }
 // 	x_path := context.Route().Path
 // 	url_key := strings.Split( x_path , "/admin" )
@@ -57,10 +35,10 @@ func ServeLoginPage( context *fiber.Ctx ) ( error ) {
 var public_limiter = rate_limiter.New( rate_limiter.Config{
 	Max: 1 ,
 	Expiration: 1 * time.Second ,
-	KeyGenerator: func( c *fiber.Ctx ) string {
+	KeyGenerator: func( c fiber.Ctx ) string {
 		return c.Get( "x-forwarded-for" )
 	} ,
-	LimitReached: func( c *fiber.Ctx ) error {
+	LimitReached: func( c fiber.Ctx ) error {
 		ip_address := c.IP()
 		log_message := fmt.Sprintf( "%s === %s === %s === PUBLIC RATE LIMIT REACHED !!!" , ip_address , c.Method() , c.Path() );
 		fmt.Println( log_message )
@@ -72,10 +50,10 @@ var public_limiter = rate_limiter.New( rate_limiter.Config{
 var private_limiter = rate_limiter.New( rate_limiter.Config{
 	Max: 3 ,
 	Expiration: 1 * time.Second ,
-	KeyGenerator: func( c *fiber.Ctx ) string {
+	KeyGenerator: func( c fiber.Ctx ) string {
 		return c.Get( "x-forwarded-for" )
 	} ,
-	LimitReached: func( c *fiber.Ctx ) error {
+	LimitReached: func( c fiber.Ctx ) error {
 		ip_address := c.IP()
 		log_message := fmt.Sprintf( "%s === %s === %s === PUBLIC RATE LIMIT REACHED !!!" , ip_address , c.Method() , c.Path() );
 		fmt.Println( log_message )

@@ -9,3 +9,6 @@ admin_password: "asdf"
 time_zone: "America/New_York"
 bolt_db_path: "./bolt.db"
 bolt_db_encryption_key: "asdf"
+serve_directory: "./public"
+serve_browsable: true
+serve_index_file: "./index.html"
