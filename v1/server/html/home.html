@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Custom Blogger Server</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="icon" href="">
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+		<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.3/dist/jquery.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+		<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js" integrity="sha256-ymhDBwPE9ZYOkHNYZ8bpTSm1o943EH2BAOWjAQB+nm4=" crossorigin="anonymous"></script>
+		<style type="text/css">
+/*			.handle {
+				cursor: grab;
+			}*/
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<br>
+			<div class="row">
+				<div class="col-sm">
+					<center><h1>Welcome to Custom Blogger Server</h1></center>
+				</div>
+			</div>
+			<br>
+			<div class="row">
+				<div class="col-sm-3"></div>
+				<div class="col-sm-6">
+					<div id="example5" class="list-group col">
+						<div class="list-group-item"><i class="fas fa-arrows-alt handle"></i>&nbsp;&nbsp;Item 1</div>
+						<div class="list-group-item"><i class="fas fa-arrows-alt handle"></i>&nbsp;&nbsp;Item 2</div>
+						<div class="list-group-item"><i class="fas fa-arrows-alt handle"></i>&nbsp;&nbsp;Item 3</div>
+						<div class="list-group-item"><i class="fas fa-arrows-alt handle"></i>&nbsp;&nbsp;Item 4</div>
+						<div class="list-group-item"><i class="fas fa-arrows-alt handle"></i>&nbsp;&nbsp;Item 5</div>
+						<div class="list-group-item"><i class="fas fa-arrows-alt handle"></i>&nbsp;&nbsp;Item 6</div>
+					</div>
+				</div>
+				<div class="col-sm-3"></div>
+			</div>
+		</div>
+		<script type="text/javascript">
+			// https://sortablejs.github.io/Sortable/#handle
+			let x = new Sortable( document.getElementById( "example5" ) , {
+				// handle: '.handle',
+				// animation: 150 ,
+				scroll: true ,
+				forceAutoScrollFallback: false ,
+				scrollSensitivity: 30 ,
+				scrollSpeed: 10 ,
+				bubbleScroll: true
+			});
+		</script>
+		<script type="text/javascript">
+			function test_post_binary() {
+				return new Promise( async function( resolve , reject ) {
+					try {
+						const form_data = new FormData();
+						const example_json = {
+							date: '2024-01-25' ,
+							type: 'example' ,
+							html: '<p>Example HTML</p>' ,
+							text: 'Example text' ,
+							mark_down: [ '# Title' , '\n' , '- asdf 1' , '- asdf2' , '- asdf 3' ]
+						};
+						form_data.append( "json" , JSON.stringify( example_json ) );
+						let example_data = new Uint8Array( 128 );
+						window.crypto.getRandomValues( example_data );
+						let example_data_blob = new Blob( [ example_data ] , { type: "application/octet-stream" } );
+						form_data.append( "bytes" , example_data_blob , "random.jpeg" );
+						const response = await fetch( "/post" , {
+							method: "POST" ,
+							body: form_data
+						});
+						if ( response.ok ) {
+							const response_body = await response.json();
+							console.log( 'Server response:' , response_body );
+							resolve( response_body );
+							return;
+						} else {
+							console.error( 'Server error:' , response.status );
+							resolve( false );
+							return;
+						}
+					}
+					catch( error ) { console.log( error ); resolve( false ); return; }
+				});
+			}
+			function test_post( post_data ) {
+				return new Promise( async function( resolve , reject ) {
+					try {
+						let response = await fetch( "/post" , {
+							method: "POST" ,
+							body: JSON.stringify( post_data ) ,
+						});
+						let response_json = await response.json();
+						resolve( response_json );
+						return;
+					}
+					catch( error ) { console.log( error ); resolve( false ); return; }
+				});
+			}
+			function test_get_post_via_seq_id( seq_id ) {
+				return new Promise( async function( resolve , reject ) {
+					try {
+						let response = await fetch( `/post/${seq_id}` , {
+							method: "GET" ,
+						});
+						let response_json = await response.json();
+						resolve( response_json );
+						return;
+					}
+					catch( error ) { console.log( error ); resolve( false ); return; }
+				});
+			}
+			( async ()=> {
+				let x = await test_post({
+					date: '2024-01-25' ,
+					type: 'example' ,
+					html: '<p>Example HTML</p>' ,
+					text: 'Example text' ,
+					mark_down: [ '# Title' , '\n' , '- asdf 1' , '- asdf2' , '- asdf 3' ]
+				});
+				console.log( x );
+				// console.log( await test_get_post_via_seq_id( 7 ) );
+			})();
+		</script>
+	</body>
+</html>

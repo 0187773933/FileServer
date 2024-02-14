@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Custom Blogger Server</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="icon" href="">
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+		<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.3/dist/jquery.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+		<!-- <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js" integrity="sha256-ymhDBwPE9ZYOkHNYZ8bpTSm1o943EH2BAOWjAQB+nm4=" crossorigin="anonymous"></script> -->
+		<script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js" integrity="sha256-xnX1c4jTWYY3xOD5/hVL1h37HCCGJx+USguyubBZsHQ=" crossorigin="anonymous"></script>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" integrity="sha256-jyIuRMWD+rz7LdpWfybO8U6DA65JCVkjgrt31FFsnAE=" crossorigin="anonymous">
+
+		<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha256-3ISyluw+iE3gkxWPdg/Z1Ftser5YtTgVV/ThOPRqWK4=" crossorigin="anonymous"></script>
+		<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/mhchem.min.js" integrity="sha256-8MoD3xlLjD1gF/9FXbag75iFeQVmP6MRps3teIsVNAs=" crossorigin="anonymous"></script>
+		<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" integrity="sha256-nLjaz8CGwpZsnsS6VPSi3EO3y+KzPOwaJ0PYhsf7R6c=" crossorigin="anonymous"></script>
+
+	</head>
+	<body>
+		<div class="container-fluid">
+			<br>
+			<div class="row">
+				<div class="col-xl-4 col-md-3"></div>
+				<div class="col-xl-4 col-md-6 col-12">
+					<input type="text" class="form-control" placeholder="Page URL" id="page-url" required>
+				</div>
+				<div class="col-xl-4 col-md-3"></div>
+			</div>
+			<br>
+			<div class="row">
+				<div class="col-xl-4 col-md-3"></div>
+				<div class="col-xl-4 col-md-6 col-12">
+					<button type="submit" class="btn btn-success" onClick="on_submit()">Save</button>
+					<!-- Todo , toggle these views , and add raw editor -->
+					<button type="submit" class="btn btn-warning" onClick="">HTML</button>
+					<!-- <button type="submit" class="btn btn-warning" onClick="">Plain</button> -->
+				</div>
+				<div class="col-xl-4 col-md-3"></div>
+			</div>
+			<br>
+			<div class="row">
+				<div class="col-xl-2"></div>
+				<div class="col-xl-8 col-12">
+					<div id="editor"></div>
+				</div>
+				<div class="col-xl-2"></div>
+			</div>
+		</div>
+		<script type="text/javascript">
+			function page_add( post_data ) {
+				return new Promise( async function( resolve , reject ) {
+					try {
+						let response = await fetch( "/page/add" , {
+							method: "POST" ,
+							body: JSON.stringify( post_data ) ,
+						});
+						let response_json = await response.json();
+						resolve( response_json );
+						return;
+					}
+					catch( error ) { console.log( error ); resolve( false ); return; }
+				});
+			}
+			function quill_get_html_b64_string() {
+				return new Promise( async function( resolve , reject ) {
+					try {
+						let page_html = window.X_QUILL.root.innerHTML;
+						console.log( page_html );
+						let page_html_blob = new Blob( [ page_html ] , { type: 'text/html' } );
+						let reader = new FileReader();
+						reader.onloadend = function() {
+							let page_html_b64 = reader.result.split( ',' )[ 1 ];
+							resolve( page_html_b64 );
+							return;
+						};
+						reader.readAsDataURL( page_html_blob );
+						return;
+					}
+					catch( error ) { console.log( error ); resolve( false ); return; }
+				});
+			}
+			function on_submit( event ) {
+				return new Promise( async function( resolve , reject ) {
+					try {
+						if ( event ) { event.preventDefault(); }
+						console.log( "on_submit()" );
+						let page_url = document.getElementById( "page-url" ).value;
+						if ( !page_url.startsWith( "/" ) ) {
+							page_url = "/" + page_url;
+						}
+						console.log( "page_url ===" , page_url );
+						let page_html_b64 = await quill_get_html_b64_string();
+						console.log( page_html_b64 );
+						let result = await page_add({
+							"url": page_url ,
+							"html_b64": page_html_b64
+						});
+						console.log( result );
+						resolve();
+						return;
+					}
+					catch( error ) { console.log( error ); resolve( false ); return; }
+				});
+			}
+			function render_katex() {
+				renderMathInElement( document.body , {
+					strict: "ignore" ,
+					delimiters: [ // https://stackoverflow.com/a/45301641
+						{ left: "$$" , right: "$$" , display: true } ,
+						// { left: "\[" , right: "\]" , display: true } ,
+						{ left: "$" , right: "$" , display: false } ,
+						// { left: "\(" , right: "\)" , display: false }
+					]
+				});
+			}
+			( async ()=> {
+				// https://github.com/quilljs/quill/issues/1335#issuecomment-699035393
+				// https://j569z.csb.app/
+				// https://codesandbox.io/p/sandbox/react-quill-full-toolbar-j569z
+				// https://medium.com/@mircea.calugaru/react-quill-editor-with-full-toolbar-options-and-custom-buttons-undo-redo-176d79f8d375
+
+				// TODO
+				// need a custom html-block , it just embeds raw html
+				// https://medium.com/@mircea.calugaru/react-quill-editor-with-full-toolbar-options-and-custom-buttons-undo-redo-176d79f8d375
+				// https://stackoverflow.com/questions/37796409/is-it-possible-to-create-a-custom-format-blot-with-complex-substructure
+				// https://github.com/quilljs/quill/issues/2611
+				// https://blog.logrocket.com/build-a-wysiwyg-text-editor-using-quill/
+
+				// https://stackoverflow.com/questions/57002748/insert-html-with-style-into-a-quilljs
+
+				const tool_bar_options = [
+					[ 'bold' , 'italic' , 'underline' , 'strike' ] , // toggled buttons
+					[ "blockquote" , "code-block" ] ,
+					[ { 'header': 1 } , { 'header': 2 } ] , // custom button values
+					[ { 'list': 'ordered' } , { 'list': 'bullet' } ] ,
+					[ { 'script': 'sub' } , { 'script': 'super' } ] ,
+					[ { 'indent': '-1' } , { 'indent': '+1' } ] ,
+					[ { 'direction': 'rtl' } ] ,
+					[ { 'size': [ 'small' , false , 'large' , 'huge' ] } ] ,
+					[ { 'header': [ 1 , 2 , 3 , 4 , 5 , 6 , false ] } ] ,
+					[ { 'color': [] } , { 'background': [] } ] ,
+					[ { 'font': [] } ] ,
+					[ { 'align': [] } ] ,
+					[ "link" , "image" , "video" , "formula" , "rawhtml" ] ,
+					[ 'clean' ] // remove formatting button
+				];
+
+				// let raw_html_module = Quill.import( "core/module" );
+				let raw_html_module = Quill.import( "formats/formula" );
+				Quill.register( "formats/rawhtml" , raw_html_module );
+
+				const quill = new Quill( "#editor" , {
+					modules: {
+						toolbar: tool_bar_options ,
+					} ,
+					placeholder: "New Text for a New Page" ,
+					theme: "snow" ,
+				});
+
+				quill.clipboard.dangerouslyPasteHTML( 0 , `<iframe width="560" height="315" src="https://www.youtube.com/embed/unJm2ouaAxo?si=IBRk04BEuWtJE5Ey" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>` );
+
+				quill.clipboard.dangerouslyPasteHTML( 0 , '<p><span style="color: red;">Hello World!</span></p>' );
+
+				// var toolbar = quill.getModule('toolbar')
+				// toolbar.addHandler( 'image' , showImageUI )
+				window.X_QUILL = quill;
+			})();
+		</script>
+	</body>
+</html>

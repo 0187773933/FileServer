@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js" integrity="sha256-xnX1c4jTWYY3xOD5/hVL1h37HCCGJx+USguyubBZsHQ=" crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" integrity="sha256-jyIuRMWD+rz7LdpWfybO8U6DA65JCVkjgrt31FFsnAE=" crossorigin="anonymous">
+	<title>Page Renderer</title>
+</head>
+<body>
+	<div id="static-b64">
+		<span>Loading ...</span>
+	</div>
+	<script type="text/javascript">
+		function get_stored_url_path_html_b64() {
+			return new Promise( async function( resolve , reject ) {
+				try {
+					let current_url_path = window.location.pathname;
+					let url = `/page/get?url=${current_url_path}`;
+					console.log( url );
+					let response = await fetch( url , { method: "GET" });
+					let response_json = await response.json();
+					resolve( response_json );
+					return;
+				}
+				catch( error ) { console.log( error ); resolve( false ); return; }
+			});
+		}
+		( async ()=> {
+			let x = await get_stored_url_path_html_b64();
+			console.log( x );
+			document.getElementById( "static-b64" ).innerHTML = atob( x.html_b64 );
+		})();
+	</script>
+</body>
+</html>
