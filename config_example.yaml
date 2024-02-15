@@ -9,6 +9,11 @@ admin_password: "asdf"
 time_zone: "America/New_York"
 bolt_db_path: "./bolt.db"
 bolt_db_encryption_key: "asdf"
+redis_address: "localhost:6379"
+redis_db_number: 1
+redis_password: ""
 serve_directory: "./public"
 serve_browsable: true
 serve_index_file: "./index.html"
+public_limiter_max: 1
+public_limiter_seconds: 1

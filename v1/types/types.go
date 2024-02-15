@@ -14,7 +14,12 @@ type ConfigFile struct {
 	TimeZone string `yaml:"time_zone"`
 	BoltDBPath string `yaml:"bolt_db_path"`
 	BoltDBEncryptionKey string `yaml:"bolt_db_encryption_key"`
+	RedisAddress string `yaml:"redis_address"`
+	RedisDBNumber int `yaml:"redis_db_number"`
+	RedisPassword string `yaml:"redis_password"`
 	ServeDirectory string `yaml:"serve_directory"`
 	ServeBrowsable bool `yaml:"serve_browsable"`
 	ServeIndexFile string `yaml:"serve_index_file"`
+	PublicLimiterMax int `yaml:"public_limiter_max"`
+	PublicLimiterSeconds int `yaml:"public_limiter_seconds"`
 }
