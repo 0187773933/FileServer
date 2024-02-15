@@ -17,3 +17,4 @@ serve_browsable: true
 serve_index_file: "./index.html"
 public_limiter_max: 1
 public_limiter_seconds: 1
+public_limiter_max_limit_count: 3

@@ -22,4 +22,5 @@ type ConfigFile struct {
 	ServeIndexFile string `yaml:"serve_index_file"`
 	PublicLimiterMax int `yaml:"public_limiter_max"`
 	PublicLimiterSeconds int `yaml:"public_limiter_seconds"`
+	PublicLimiterMaxLimitCount int64 `yaml:"public_limiter_max_limit_count"`
 }
