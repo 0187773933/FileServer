@@ -14,7 +14,8 @@ type ConfigFile struct {
 	TimeZone string `yaml:"time_zone"`
 	BoltDBPath string `yaml:"bolt_db_path"`
 	BoltDBEncryptionKey string `yaml:"bolt_db_encryption_key"`
-	RedisAddress string `yaml:"redis_address"`
+	RedisHost string `yaml:"redis_host"`
+	RedisPort string `yaml:"redis_port"`
 	RedisDBNumber int `yaml:"redis_db_number"`
 	RedisPassword string `yaml:"redis_password"`
 	ServeDirectory string `yaml:"serve_directory"`

@@ -36,7 +36,7 @@ func SetupCloseHandler() {
 
 func SetupRedis( config *types.ConfigFile ) {
 	REDIS = redis.NewClient( &redis.Options{
-		Addr: config.RedisAddress ,
+		Addr: fmt.Sprintf( "%s:%s" , config.RedisHost , config.RedisPort ) ,
 		Password: config.RedisPassword ,
 		DB: config.RedisDBNumber ,
 	})

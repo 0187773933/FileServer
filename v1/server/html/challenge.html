@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<title>checking browser...</title>
+<script src="https://cdn.jsdelivr.net/npm/js-sha256@0.11.0/src/sha256.min.js"></script>
+</head><body>
+<script>
+	( async ()=> {
+		for( let a=0; ; a++ ){
+			if( "%s" === await sha256( a + "-%s" ) ){
+				document.cookie="_challenge_n="+a,location.reload();
+				break;
+			}
+		}
+	})();
+</script>
+<noscript>You need JavaScript to visit this website.</noscript>
+</body></html>
